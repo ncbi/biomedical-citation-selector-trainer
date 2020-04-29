@@ -10,6 +10,7 @@
 ```
 conda create --name selective_indexing --file requirements.txt
 conda activate selective_indexing
+conda install requests
 pip install tensorflow-gpu==2.0.1
 ```
 

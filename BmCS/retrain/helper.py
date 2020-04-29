@@ -21,6 +21,30 @@ def load_delimited_data(path, encoding, delimiter):
     return data
 
 
+def load_indexing_periods(filepath, encoding, is_fully_indexed):
+    periods = {}
+    with open(filepath, "rt", encoding=encoding) as file:
+        for line in file:
+            split = line.split(",")
+
+            nlm_id = split[0].strip()
+            citation_subset = split[1].strip()
+            start_year = int(split[2].strip())
+            end_year = int(split[3].strip())
+            
+            if start_year < 0:
+                continue
+            if end_year < 0:
+                end_year = None
+
+            period = { "citation_subset": citation_subset, "is_fully_indexed": is_fully_indexed, "start_year": start_year, "end_year": end_year }
+            if nlm_id in periods:
+                periods[nlm_id].append(period)
+            else:
+                periods[nlm_id] = [period]
+    return periods
+
+
 def load_pickled_object(path):
     loaded_object = pickle.load(open(path, "rb"))
     return loaded_object

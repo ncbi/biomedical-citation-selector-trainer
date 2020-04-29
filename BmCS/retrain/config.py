@@ -1,17 +1,22 @@
 # User settings
 BASELINE_FILENAME_TEMPLATE = "pubmed18n{0:04d}.xml.gz"
 BASELINE_URL = "https://mbr.nlm.nih.gov/Download/Baselines/2018/" # Must include last /
+EFETCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
+ESEARCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
+EUTILS_DELAY = 0.34 # seconds
+EUTILS_RETMAX = 10000
 JOURNAL_MEDLINE_FILENAME = "J_Medline.txt"
 MODEL_MAX_YEAR = 2018
 NUM_BASLINE_FILES = 1250
 REPORTING_JOURNALS_FILENAME = "selectively-indexed-journals-of-interest.csv"
 SERIALS_FILENAME = "lsi2018.xml"
+USE_EUTILS = True
 VOTING_TRAIN_YEAR = 2017
 
 # System settings
-BASELINE_DATA_DIR = "medline_data"
 CNN_DATA_DIR = "cnn_model"
 DATE_FORMAT = "%Y-%m-%d"
+DOWNLOADED_DATA_FILENAME_TEMPLATE = "{0:04d}.xml.gz"
 ENCODING = "utf8"
 EXTRACTED_DATA_FILENAME_TEMPLATE = "{0:04d}.json.gz"
 EXCLUDED_REF_TYPES = ['CommentOn',
@@ -24,6 +29,7 @@ EXCLUDED_REF_TYPES = ['CommentOn',
 'ReprintOf']
 JOURNAL_ID_DICT_FILENAME = "journal_id_dict.pkl"
 JOURNAL_ID_TXT_FILENAME = "journal_ids.txt"
+MEDLINE_DATA_DIR = "medline_data"
 MIN_PUB_YEAR = 1809
 MIN_YEAR_INDEXED = 1965
 OPT_THRESHOLDS_DELTA = .00005

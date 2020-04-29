@@ -1,19 +1,19 @@
 from . import config as cfg
-from .helper import load_delimited_data
+from .helper import load_delimited_data, load_indexing_periods
 import json
 import gzip
 import os.path
 import random
 
 
-def create_dataset(workdir):
-    DATA_FILEPATH_TEMPLATE = os.path.join(workdir, cfg.BASELINE_DATA_DIR, cfg.EXTRACTED_DATA_FILENAME_TEMPLATE)
+def create_dataset(workdir, num_xml_files):
+    DATA_FILEPATH_TEMPLATE = os.path.join(workdir, cfg.MEDLINE_DATA_DIR, cfg.EXTRACTED_DATA_FILENAME_TEMPLATE)
     SELECTIVE_INDEXING_PERIODS_FILEPATH = os.path.join(workdir, cfg.SELECTIVE_INDEXING_PERIODS_FILENAME)
 
     data_set = {}
     indexing_periods = load_indexing_periods(SELECTIVE_INDEXING_PERIODS_FILEPATH, cfg.ENCODING, False)
-    for file_num in range(1, cfg.NUM_BASLINE_FILES + 1):
-        print(f"{file_num}/{cfg.NUM_BASLINE_FILES}", end="\r")
+    for file_num in range(1, num_xml_files + 1):
+        print(f"{file_num}/{num_xml_files}", end="\r")
         data_filepath = DATA_FILEPATH_TEMPLATE.format(file_num)
         with gzip.open(data_filepath, "rt", encoding=cfg.ENCODING) as data_file: 
             data = json.load(data_file)
@@ -21,7 +21,7 @@ def create_dataset(workdir):
                 if is_selectively_indexed(indexing_periods, article) and not has_excluded_ref_type(article):
                     pmid = article["pmid"]
                     data_set[pmid] = article
-    print(f"{cfg.NUM_BASLINE_FILES}/{cfg.NUM_BASLINE_FILES}")
+    print(f"{num_xml_files}/{num_xml_files}")
     return data_set
 
 
@@ -49,37 +49,13 @@ def is_test_set_candidate(reporting_nlmids, article):
     return pub_year == cfg.TEST_SET_YEAR and nlm_id in reporting_nlmids
 
 
-def load_indexing_periods(filepath, encoding, is_fully_indexed):
-    periods = {}
-    with open(filepath, "rt", encoding=encoding) as file:
-        for line in file:
-            split = line.split(",")
-
-            nlm_id = split[0].strip()
-            citation_subset = split[1].strip()
-            start_year = int(split[2].strip())
-            end_year = int(split[3].strip())
-            
-            if start_year < 0:
-                continue
-            if end_year < 0:
-                end_year = None
-
-            period = { "citation_subset": citation_subset, "is_fully_indexed": is_fully_indexed, "start_year": start_year, "end_year": end_year }
-            if nlm_id in periods:
-                periods[nlm_id].append(period)
-            else:
-                periods[nlm_id] = [period]
-    return periods
-
-
-def run(workdir):
+def run(workdir, num_xml_files):
     TRAIN_SET_FILEPATH = os.path.join(workdir, cfg.TRAIN_SET_FILENAME)
     VAL_SET_FILEPATH = os.path.join(workdir, cfg.VAL_SET_FILENAME)
     TEST_SET_FILEPATH = os.path.join(workdir, cfg.TEST_SET_FILENAME)
     REPORTING_JOURNALS_FILEPATH = os.path.join(workdir, cfg.REPORTING_JOURNALS_FILENAME)
 
-    data_set = create_dataset(workdir)
+    data_set = create_dataset(workdir, num_xml_files)
 
     reporting_nlmids = [row[0] for row in load_delimited_data(REPORTING_JOURNALS_FILEPATH, cfg.ENCODING, ',')]
     test_set_candidates = [article for article in data_set.values() if is_test_set_candidate(reporting_nlmids, article)]

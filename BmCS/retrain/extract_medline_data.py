@@ -12,14 +12,14 @@ import xml.etree.ElementTree as ET
 MEDLINE_CITATION_NODE_PATH = 'PubmedArticle/MedlineCitation'
 
 
-def run(workdir):
-    datadir = os.path.join(workdir, cfg.BASELINE_DATA_DIR)
+def run(workdir, num_xml_files):
+    datadir = os.path.join(workdir, cfg.MEDLINE_DATA_DIR)
     create_dir(datadir)
 
     START_DATA_FILE_NUM = 1
-    END_DATA_FILE_NUM = cfg.NUM_BASLINE_FILES
+    END_DATA_FILE_NUM = num_xml_files
 
-    DATA_FILEPATH_TEMPLATE = os.path.join(datadir, cfg.BASELINE_FILENAME_TEMPLATE)
+    DATA_FILEPATH_TEMPLATE = os.path.join(datadir, cfg.DOWNLOADED_DATA_FILENAME_TEMPLATE)
     LOG_FILEPATH = os.path.join(datadir, 'extract_data_log.txt')
     JSON_FILEPATH_TEMPLATE = os.path.join(datadir, cfg.EXTRACTED_DATA_FILENAME_TEMPLATE)
    
