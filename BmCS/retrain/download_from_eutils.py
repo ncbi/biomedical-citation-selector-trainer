@@ -17,10 +17,10 @@ def efetch(webenv, query_key, retstart):
     return xml
 
 
-def esearch(nlmid, start_year, end_year):
-    #https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=0410462[nlmid]&mindate=2018&maxdate=2020&datetype=pdat&retmode=json&usehistory=y
+def esearch(nlmid, min_date_str, max_date_str):
+    #https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=0410462[nlmid]&mindate=2018/01/01&maxdate=2020/12/31&datetype=pdat&retmode=json&usehistory=y
 
-    params = {"db": "pubmed", "term": f"{nlmid}[nlmid]", "mindate": f"{start_year}", "maxdate": f"{end_year}", "datetype": "pdat", "retmode": "json", "usehistory": "y"}
+    params = {"db": "pubmed", "term": f"{nlmid}[nlmid]", "mindate": min_date_str, "maxdate": max_date_str, "datetype": "pdat", "retmode": "json", "usehistory": "y"}
     r = requests.get(cfg.ESEARCH_URL, params=params)
     
     esearchresult = json.loads(r.text)["esearchresult"]
@@ -50,10 +50,11 @@ def run(workdir):
         for period in indexing_periods[nlmid]:
             start_year = period["start_year"]
             end_year = period["end_year"]
-            download_start_year = start_year + 1
-            download_end_year = end_year - 1 if end_year is not None else cfg.MODEL_MAX_YEAR
 
-            webenv, query_key, num_results = esearch(nlmid, download_start_year, download_end_year)
+            min_date_str = f"{(start_year + 1):04d}/01/01"
+            max_date_str = f"{(end_year - 1):04d}/12/31" if end_year is not None else cfg.EUTILS_MAX_DATE
+
+            webenv, query_key, num_results = esearch(nlmid, min_date_str, max_date_str)
         
             batch_size = cfg.EUTILS_RETMAX
             num_batches = math.ceil(num_results/batch_size)

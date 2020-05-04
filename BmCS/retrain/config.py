@@ -4,6 +4,7 @@ BASELINE_URL = "https://mbr.nlm.nih.gov/Download/Baselines/2018/" # Must include
 EFETCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
 ESEARCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
 EUTILS_DELAY = 0.34 # seconds
+EUTILS_MAX_DATE = "2018/08/31" # Do not download articles published after this date
 EUTILS_RETMAX = 10000
 JOURNAL_MEDLINE_FILENAME = "J_Medline.txt"
 MODEL_MAX_YEAR = 2018
