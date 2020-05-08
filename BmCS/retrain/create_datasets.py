@@ -1,3 +1,4 @@
+from datetime import datetime as dt
 from . import config as cfg
 from .helper import load_delimited_data, load_indexing_periods
 import json
@@ -18,7 +19,9 @@ def create_dataset(workdir, num_xml_files):
         with gzip.open(data_filepath, "rt", encoding=cfg.ENCODING) as data_file: 
             data = json.load(data_file)
             for article in data["articles"]:
-                if is_selectively_indexed(indexing_periods, article) and not has_excluded_ref_type(article):
+                if (is_selectively_indexed(indexing_periods, article) 
+                    and not has_excluded_ref_type(article)
+                    and was_completed_before_max_date(article)):
                     pmid = article["pmid"]
                     data_set[pmid] = article
     print(f"{num_xml_files}/{num_xml_files}")
@@ -84,3 +87,9 @@ def run(workdir, num_xml_files):
 def save_dataset(dataset, filepath):
     with gzip.open(filepath, "wt", encoding=cfg.ENCODING) as save_file:
          json.dump(dataset, save_file, ensure_ascii=False, indent=4)
+
+
+def was_completed_before_max_date(article):
+    date_completed = dt.strptime(article["date_completed"], cfg.DATE_FORMAT).date()
+    result = date_completed <= cfg.MODEL_MAX_DATE
+    return result

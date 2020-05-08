@@ -52,7 +52,7 @@ def run(workdir):
             end_year = period["end_year"]
 
             min_date_str = f"{(start_year + 1):04d}/01/01"
-            max_date_str = f"{(end_year - 1):04d}/12/31" if end_year is not None else cfg.EUTILS_MAX_DATE
+            max_date_str = f"{(end_year - 1):04d}/12/31" if end_year is not None else cfg.MODEL_MAX_DATE.strftime("%Y/%m/%d")
 
             webenv, query_key, num_results = esearch(nlmid, min_date_str, max_date_str)
         

@@ -1,13 +1,14 @@
+from datetime import date
+
 # User settings
 BASELINE_FILENAME_TEMPLATE = "pubmed18n{0:04d}.xml.gz"
 BASELINE_URL = "https://mbr.nlm.nih.gov/Download/Baselines/2018/" # Must include last /
 EFETCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
 ESEARCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
 EUTILS_DELAY = 0.34 # seconds
-EUTILS_MAX_DATE = "2018/08/31" # Do not download articles published after this date
 EUTILS_RETMAX = 10000
 JOURNAL_MEDLINE_FILENAME = "J_Medline.txt"
-MODEL_MAX_YEAR = 2018
+MODEL_MAX_DATE = date(2018,8,31)
 NUM_BASLINE_FILES = 1250
 REPORTING_JOURNALS_FILENAME = "selectively-indexed-journals-of-interest.csv"
 SERIALS_FILENAME = "lsi2018.xml"
@@ -52,6 +53,6 @@ WORD_INDEX_TXT_VOCAB_SIZE = 400000
 # Dynamic settings
 PP_CONFIG = {"min_pub_year": MIN_PUB_YEAR,
              "min_year_indexed": MIN_YEAR_INDEXED,
-             "model_max_year": MODEL_MAX_YEAR,
+             "model_max_year": MODEL_MAX_DATE.year,
              "date_format": DATE_FORMAT}
-TEST_SET_YEAR = MODEL_MAX_YEAR
+TEST_SET_YEAR = MODEL_MAX_DATE.year
