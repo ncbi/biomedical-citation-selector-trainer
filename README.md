@@ -35,4 +35,8 @@ python -m BmCS.retrain --workdir /path/to/workdir
      
 9) In BmCS/thresholds.py in the biomedical-citation-selector repository, update COMBINED_THRESH with the high recall threshold saved in the first line of the combined_optimum_thresholds.txt file, and also update PRECISION_THRESH with the high precision theshold saved in the second line of the combined_optimum_thresholds.txt file. After these changes the system is now configured to run with the new retrained models.
 
-10) Use the BmCS package --validation and --test options to confirm that the BmCS system is performing as expected. 
+10) Use the BmCS package --test option to confirm that the BmCS system is performing as expected:
+
+```
+BmCS /path/to/workdir/cnn_model/checkpoints/best_model.hdf5 /path/to/workdir/voting_model/voting_model.joblib --test --tolerance=0.04
+```
