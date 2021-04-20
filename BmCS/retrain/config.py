@@ -1,19 +1,19 @@
 from datetime import date
 
 # User settings
-BASELINE_FILENAME_TEMPLATE = "pubmed18n{0:04d}.xml.gz"
-BASELINE_URL = "https://mbr.nlm.nih.gov/Download/Baselines/2018/" # Must include last /
+BASELINE_FILENAME_TEMPLATE = "pubmed21n{0:04d}.xml.gz"
+BASELINE_URL = "ftp://ftp.ncbi.nlm.nih.gov/pubmed/baseline/" # Must include last /
 EFETCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
 ESEARCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
 EUTILS_DELAY = 0.34 # seconds
 EUTILS_RETMAX = 10000
-JOURNAL_MEDLINE_FILENAME = "J_Medline.txt"
-MODEL_MAX_DATE = date(2018,8,31)
-NUM_BASLINE_FILES = 1250
-REPORTING_JOURNALS_FILENAME = "selectively-indexed-journals-of-interest.csv"
-SERIALS_FILENAME = "lsi2018.xml"
+JOURNAL_MEDLINE_FILENAME = "J_Medline_16th_April_21.txt.gz"
+MODEL_MAX_DATE = date(2021,4,1) # v1 2018,8,31
+NUM_BASLINE_FILES = 1062
+REPORTING_JOURNALS_FILENAME = "selectively_indexed_journals_29th_Mar_21.json"
+SERIALS_FILENAME = "lsi2021.xml.gz"
 USE_EUTILS = True
-VOTING_TRAIN_YEAR = 2017
+VOTING_TRAIN_YEAR = 2020
 
 # System settings
 CNN_DATA_DIR = "cnn_model"
