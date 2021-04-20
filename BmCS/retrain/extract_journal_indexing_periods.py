@@ -1,5 +1,6 @@
 from . import config as cfg
 from datetime import date
+import gzip
 from .helper import save_delimited_data
 import os.path
 import re
@@ -30,10 +31,11 @@ CITATION_SUBSETS = [
 
 
 def run(workdir):
+    ENCODING = cfg.ENCODING
     SELECTIVE_INDEXING_PERIODS_FILEPATH = os.path.join(workdir, cfg.SELECTIVE_INDEXING_PERIODS_FILENAME)
     SERIALS_FILEPATH = os.path.join(workdir, cfg.SERIALS_FILENAME)
     
-    serials = _parse_serials(SERIALS_FILEPATH)
+    serials = _parse_serials(SERIALS_FILEPATH, ENCODING)
     selective_time_periods = _extract_time_periods(serials, 'Selective')
     _serialize_time_periods(SELECTIVE_INDEXING_PERIODS_FILEPATH, cfg.ENCODING, selective_time_periods)
 
@@ -143,7 +145,7 @@ def _extract_time_periods(serials, target):
     return time_periods
 
     
-def _parse_serials(serials_filepath):
+def _parse_serials(serials_filepath, encoding):
     '''
         serials = 
         [
@@ -164,7 +166,7 @@ def _parse_serials(serials_filepath):
         ] 
     '''
 
-    root_node = ET.parse(serials_filepath)
+    root_node = ET.parse(gzip.open(serials_filepath, "rt", encoding=encoding))
 
     serials = []  
     for serial_node in root_node.findall('Serial'):
