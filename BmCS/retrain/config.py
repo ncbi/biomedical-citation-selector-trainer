@@ -8,12 +8,13 @@ ESEARCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
 EUTILS_DELAY = 0.34 # seconds
 EUTILS_RETMAX = 10000
 JOURNAL_MEDLINE_FILENAME = "J_Medline_16th_April_21.txt.gz"
-MODEL_MAX_DATE = date(2021,4,1) # v1 2018,8,31
+MODEL_MAX_DATE = date(2020,12,13) # v1 2018,8,31
 NUM_BASLINE_FILES = 1062
 REPORTING_JOURNALS_FILENAME = "selectively_indexed_journals_29th_Mar_21.json"
+SELECTIVE_INDEXING_PERIODS_FILENAME = "2021_selective_indexing_periods_input.csv"
 SERIALS_FILENAME = "lsi2021.xml.gz"
-USE_EUTILS = True
-VOTING_TRAIN_YEAR = 2020
+USE_EUTILS = False
+VOTING_TRAIN_YEAR = 2019
 
 # System settings
 CNN_DATA_DIR = "cnn_model"
@@ -38,7 +39,6 @@ OPT_THRESHOLDS_DELTA = .00005
 OPT_THRESHOLDS_FILENAME_TEMPLATE = "{}_optimum_thresholds.txt"
 OPT_THRESHOLDS_TARGET_PRECISION = 0.97
 OPT_THRESHOLDS_TARGET_RECALL = 0.995
-SELECTIVE_INDEXING_PERIODS_FILENAME = "selective_indexing_periods.txt"
 TEST_SET_FILENAME = "test_set.json.gz"
 TEST_SET_SIZE = 30000
 TRAIN_SET_FILENAME = "train_set.json.gz"
