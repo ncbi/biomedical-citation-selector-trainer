@@ -52,7 +52,7 @@ def run(workdir):
             end_year = period["end_year"]
 
             min_year = (start_year + 1)
-            max_year = (end_year - 1) if end_year is not None else cfg.MODEL_MAX_DATE.year
+            max_year = (end_year - 1) if end_year is not None else cfg.TEST_SET_YEAR
 
             webenv, query_key, num_results = esearch(nlmid, min_year, max_year)
         

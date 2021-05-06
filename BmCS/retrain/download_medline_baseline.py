@@ -1,6 +1,5 @@
 from . import config as cfg
 from .helper import create_dir
-
 import os.path
 from urllib.request import urlretrieve
 

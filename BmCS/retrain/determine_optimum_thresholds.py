@@ -1,9 +1,9 @@
 from .cnn import pred as cnn_pred
 from . import config as cfg
 from .helper import load_dataset, load_pickled_object, preprocess_voting_model_data
+import joblib
 import numpy as np
 import os.path
-from sklearn.externals import joblib
 from sklearn.metrics import precision_score, recall_score
 
 
@@ -21,18 +21,6 @@ def compute_precision_recall(combined_predictions, threshold):
     return precision, recall
 
 
-def get_cnn_predictions(workdir, val_set):
-    CNN_DATA_DIR = workdir
-    CNN_RUNS_DIR = os.path.join(workdir, cfg.CNN_DATA_DIR)
-    JOURNAL_ID_DICT_FILEPATH = os.path.join(workdir, cfg.JOURNAL_ID_DICT_FILENAME)
-    WORD_INDEX_DICT_FILEPATH = os.path.join(workdir, cfg.WORD_INDEX_DICT_FILENAME)
-
-    word_index_lookup = load_pickled_object(WORD_INDEX_DICT_FILEPATH)
-    journal_id_lookup = load_pickled_object(JOURNAL_ID_DICT_FILEPATH)
-    predictions = cnn_pred.run(CNN_DATA_DIR, CNN_RUNS_DIR, word_index_lookup, journal_id_lookup, val_set, cfg.PP_CONFIG)
-    return predictions
-
-
 def get_combined_predictions(cnn_predictions, voting_predictions):
     combined_predictions = {}
     for pmid in cnn_predictions:
@@ -44,6 +32,18 @@ def get_combined_predictions(cnn_predictions, voting_predictions):
         combined_score = voting_score*cnn_score
         combined_predictions[pmid] = { 'act': act, 'score': combined_score}
     return combined_predictions
+
+
+def get_cnn_predictions(workdir, val_set):
+    CNN_DATA_DIR = workdir
+    CNN_RUNS_DIR = os.path.join(workdir, cfg.CNN_DATA_DIR)
+    JOURNAL_ID_DICT_FILEPATH = os.path.join(workdir, cfg.JOURNAL_ID_DICT_FILENAME)
+    WORD_INDEX_DICT_FILEPATH = os.path.join(workdir, cfg.WORD_INDEX_DICT_FILENAME)
+
+    word_index_lookup = load_pickled_object(WORD_INDEX_DICT_FILEPATH)
+    journal_id_lookup = load_pickled_object(JOURNAL_ID_DICT_FILEPATH)
+    predictions = cnn_pred.run(CNN_DATA_DIR, CNN_RUNS_DIR, word_index_lookup, journal_id_lookup, val_set, cfg.PP_CONFIG)
+    return predictions
 
 
 def get_voting_predictions(workdir, val_set):

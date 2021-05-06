@@ -156,7 +156,6 @@ class _PreprocessingConfig(_ConfigBase):
         self.vocab_size = 400000
         self.min_year_completed = None # 1965
         self.max_year_completed = None # 2018
-        self.model_max_year = None # 2018
         self.min_pub_year = None # 1809 
         self.max_pub_year = None # 2018
         self.date_format = '%Y-%m-%d'

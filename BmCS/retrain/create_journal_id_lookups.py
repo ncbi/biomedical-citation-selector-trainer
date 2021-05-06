@@ -1,11 +1,12 @@
 from . import config as cfg
+import gzip
 import os.path
 from pickle import dump
 
 LINES_PER_JOURNAL = 8
 
 def create_dict(filepath):
-    with open(filepath, "rt", encoding=cfg.ENCODING) as journals_file:
+    with gzip.open(filepath, "rt", encoding=cfg.ENCODING) as journals_file:
         lines = journals_file.readlines()
 
     line_count = len(lines)

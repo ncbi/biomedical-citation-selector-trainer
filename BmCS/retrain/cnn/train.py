@@ -14,10 +14,10 @@ def run(data_dir, runs_dir, word_index_lookup, journal_id_lookup, train_set, dev
 
     model_config.num_journals = len(journal_id_lookup) + 1
     pp_config.min_pub_year = preprocessing_config["min_pub_year"]
-    pp_config.max_pub_year = preprocessing_config["model_max_year"]
+    pp_config.max_pub_year = preprocessing_config["max_pub_year"]
+    
     pp_config.min_year_completed = preprocessing_config["min_year_indexed"]
-    pp_config.max_year_completed = preprocessing_config["model_max_year"]
-    pp_config.model_max_year = preprocessing_config["model_max_year"]
+    pp_config.max_year_completed = preprocessing_config["max_year_indexed"]
     pp_config.date_format = preprocessing_config["date_format"]
 
     word_index_lookup = set_vocab_size(word_index_lookup, pp_config.vocab_size)

@@ -44,7 +44,8 @@ class Model:
 
         model = tensorflow.keras.models.Model(inputs=[title_input, abstract_input, pub_year_input, year_completed_input, journal_input], outputs=[output])
 
-        loss, optimizer, metrics = self._get_compile_inputs(model_config.init_learning_rate, model_config.init_threshold) 
+        loss, optimizer, metrics, fscore_threshold = self._get_compile_inputs(model_config.init_learning_rate, model_config.init_threshold) 
+        self._fscore_threshold = fscore_threshold
         model.compile(loss=loss, optimizer=optimizer, metrics=metrics)
         self._model = model
 
@@ -120,7 +121,7 @@ class Model:
 
         # Optimize fscore threshold
         if train_config.optimize_fscore_threshold.enabled:
-            optimize_fscore_threshold_callback = OptimizeFscoreThresholdCallback(train_config.optimize_fscore_threshold, opt_data)
+            optimize_fscore_threshold_callback = OptimizeFscoreThresholdCallback(self._fscore_threshold, train_config.optimize_fscore_threshold, opt_data)
             callbacks.append(optimize_fscore_threshold_callback)
 
         # Save checkpoints
@@ -157,7 +158,7 @@ class Model:
             tensorboard_callback = TensorBoard(log_dir, write_graph=train_config.tensorboard.write_graph)
             callbacks.append(tensorboard_callback)
 
-        history = self._model.fit_generator(training_data, epochs=train_config.max_epochs, verbose=1, callbacks=callbacks, 
+        history = self._model.fit(training_data, epochs=train_config.max_epochs, verbose=1, callbacks=callbacks, 
                                  validation_data=dev_data, shuffle=True, initial_epoch=train_config.initial_epoch, use_multiprocessing=train_config.use_multiprocessing, workers=train_config.workers, max_queue_size=train_config.max_queue_size)
         logs = history.history
 
@@ -178,7 +179,7 @@ class Model:
 
     def restore(self, restore_config, input_dir):
         checkpoint_path = os_path.join(input_dir, restore_config.model_checkpoint_dir, restore_config.model_checkpoint_filename)
-        loss, optimizer, metrics = self._get_compile_inputs(restore_config.learning_rate, restore_config.threshold) 
+        loss, optimizer, metrics, _ = self._get_compile_inputs(restore_config.learning_rate, restore_config.threshold) 
         custom_objects = { EmbeddingWithDropout.__name__: EmbeddingWithDropout }
         if restore_config.weights_only_checkpoint:
             model_json_filepath = os_path.join(input_dir, restore_config.model_json_filename)
@@ -202,7 +203,7 @@ class Model:
             batch_scores = self._model.predict_on_batch(x)
             batch_size = len(batch_scores)
             for index in range(batch_size):
-                pmid = x['pmids'][index]
+                pmid = int(x['pmids'][index])
                 score = batch_scores[index][0]
                 act = y[index][0]
                 predictions[pmid] = { 'act': act, 'score': score}
@@ -213,7 +214,7 @@ class Model:
         optimizer = Adam(lr=learning_rate)
         fscore_metric = F1Score(None, 'micro', threshold, name=FSCORE_METRIC_NAME)
         metrics = [fscore_metric]
-        return loss, optimizer, metrics
+        return loss, optimizer, metrics, fscore_metric.threshold 
 
     def _mkdir(self, dir):
         if not os_path.isdir(dir): 
@@ -226,19 +227,23 @@ class Model:
 
 class OptimizeFscoreThresholdCallback(Callback):
 
-    def __init__(self, config, opt_data):
+    def __init__(self, threshold, config, opt_data):
         super().__init__()
         self.config = config
         self.opt_data = opt_data
+        self.threshold = threshold
+        self.metric_index = -1
 
     def set_model(self, model):
         super().set_model(model)
-        self.threshold = self.model.metrics[0].threshold
-        for idx, metric_name in enumerate(self.model.metrics_names):
-            if metric_name == self.config.metric_name:
-                self.metric_index = idx
-
+        
     def on_batch_end(self, batch, logs = None):
+
+        if self.metric_index < 0:
+            for idx, metric_name in enumerate(self.model.metrics_names):
+                if metric_name == self.config.metric_name:
+                    self.metric_index = idx
+
         step = batch + 1
         if step == self.params['steps']: # Have finished the last batch
             self.prev_threshold_value = K.get_value(self.threshold)
@@ -249,7 +254,7 @@ class OptimizeFscoreThresholdCallback(Callback):
             best_threshold = self.prev_threshold_value
             for candidate_threshold in candidate_thresholds:
                 K.set_value(self.threshold, candidate_threshold)
-                metrics = self.model.evaluate_generator(self.opt_data, use_multiprocessing=self.config.use_multiprocessing, workers=self.config.workers, max_queue_size=self.config.max_queue_size)
+                metrics = self.model.evaluate(self.opt_data, use_multiprocessing=self.config.use_multiprocessing, workers=self.config.workers, max_queue_size=self.config.max_queue_size)
                 metric_value = metrics[self.metric_index]
                 if metric_value > best_metric_value:
                     best_metric_value = metric_value

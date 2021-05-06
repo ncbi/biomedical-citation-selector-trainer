@@ -1,6 +1,6 @@
 from collections import defaultdict
 from . import config as cfg
-import gzip
+from helper import load_dataset
 import json
 import os.path
 from nltk.tokenize import word_tokenize
@@ -34,9 +34,8 @@ def run(workdir):
     WORD_INDEX_DICT_FILEPATH = os.path.join(workdir, cfg.WORD_INDEX_DICT_FILENAME)
     WORD_INDEX_TXT_FILEPATH = os.path.join(workdir, cfg.WORD_INDEX_TXT_FILENAME)
 
-    with gzip.open(TRAIN_SET_FILEPATH , "rt", encoding=cfg.ENCODING) as train_file:
-        train_set = json.load(train_file)
-        word_index_dict = create_dict(train_set)
+    train_set = load_dataset(TRAIN_SET_FILEPATH, cfg.ENCODING)
+    word_index_dict = create_dict(train_set)
 
     with open(WORD_INDEX_DICT_FILEPATH, "wb") as wid_file:
         dump(word_index_dict, wid_file)
