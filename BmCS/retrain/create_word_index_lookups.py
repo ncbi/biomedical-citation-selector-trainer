@@ -1,6 +1,6 @@
 from collections import defaultdict
 from . import config as cfg
-from helper import load_dataset
+from .helper import load_dataset
 import json
 import os.path
 from nltk.tokenize import word_tokenize
