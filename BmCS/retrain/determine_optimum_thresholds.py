@@ -63,6 +63,22 @@ def get_voting_predictions(workdir, val_set):
     return predictions
 
 
+def _save_test_set_predictions(workdir, combined_predictions):
+    import gzip
+    
+    BMCS_RESULTS_FILEPATH = os.path.join(workdir, cfg.BMCS_RESULTS_FILENAME)
+    SAVE_FILEPATH = os.path.join(workdir, "val_set_predictions.csv")
+    
+    with gzip.open(BMCS_RESULTS_FILEPATH, "rt", encoding=cfg.ENCODING) as read_file, \
+         open(SAVE_FILEPATH, "wt", encoding=cfg.ENCODING) as write_file:
+        write_file.write("pmid,is_indexed,bmcs_result,combined_pred\n")
+        for line in read_file:
+            pmid, result = line.strip().split()
+            pmid, result = int(pmid), int(result)
+            if pmid in combined_predictions:
+                write_file.write(f"{pmid},{int(combined_predictions[pmid]['act'])},{result},{float(combined_predictions[pmid]['score']):.10f}\n")
+            
+
 def run(workdir):
     OPT_THRESHOLDS_FILEPATH_TEMPLATE = os.path.join(workdir, cfg.OPT_THRESHOLDS_FILENAME_TEMPLATE)
     VAL_SET_FILEPATH = os.path.join(workdir, cfg.VAL_SET_FILENAME)
@@ -72,6 +88,8 @@ def run(workdir):
     voting_predictions = get_voting_predictions(workdir, val_set)
     combined_predictions = get_combined_predictions(cnn_predictions, voting_predictions)
 
+    #_save_test_set_predictions(workdir, combined_predictions)
+    
     cnn_predictions = to_numpy(cnn_predictions)
     voting_predictions = to_numpy(voting_predictions)
     combined_predictions = to_numpy(combined_predictions)

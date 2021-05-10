@@ -1,14 +1,12 @@
 # Retraining Instructions
 
 1) Create a working directory.
-2) Copy J_Medline.txt, lsi2018.xml, and selectivly-indexed-journals-of-interest.csv from ./input_data to the working directory.
-3) Create an anconda environment:
+2) Copy the input data files from ./input_data to the working directory.
+3) Create and activate the anconda environment:
 
 ```
-conda create --name selective_indexing --file requirements.txt
-conda activate selective_indexing
-conda install requests
-pip install tensorflow-gpu==2.0.1
+conda create --name retraining --file requirements.txt
+conda activate retraining
 ```
 
 4) Download the data for the tokenizer:
