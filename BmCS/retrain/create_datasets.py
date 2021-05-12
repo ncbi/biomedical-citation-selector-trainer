@@ -1,4 +1,6 @@
 from . import config as cfg
+import csv
+from datetime import datetime as dt
 from .helper import load_indexing_periods
 import json
 import gzip
@@ -42,6 +44,24 @@ def load_bmcs_pmids(path):
     return pmids
 
 
+def load_problematic_journal_nlmids(path):
+    with open(path, "rt", encoding=cfg.ENCODING) as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=",")
+        problematic_jouranls = set([str(row[0]) for row in csv_reader])
+        return problematic_jouranls
+
+
+def is_problematic_article(problematic_journal_nlmids, article):
+    date_completed_str = article["date_completed"] if article["date_completed"] else article["date_revised"]
+    year_completed = dt.strptime(date_completed_str, cfg.DATE_FORMAT).date().year
+    
+    nlm_id = article["journal_nlmid"]
+    is_problematic_journal = nlm_id in problematic_journal_nlmids
+
+    is_problematic = is_problematic_journal and year_completed < 2015 
+    return is_problematic
+
+
 def is_selectively_indexed(indexing_periods, article):
     nlm_id = article["journal_nlmid"]
     pub_year = article["pub_year"]
@@ -56,6 +76,7 @@ def is_selectively_indexed(indexing_periods, article):
 def run(workdir, num_xml_files):
     
     BMCS_RESULTS_FILEPATH = os.path.join(workdir, cfg.BMCS_RESULTS_FILENAME)
+    PROBLEMATIC_JOURNALS_FILEPATH = os.path.join(workdir, cfg.PROBLEMATIC_JOURNALS_FILENAME)
     TRAIN_SET_FILEPATH = os.path.join(workdir, cfg.TRAIN_SET_FILENAME)
     VAL_SET_FILEPATH = os.path.join(workdir, cfg.VAL_SET_FILENAME)
     TEST_SET_FILEPATH = os.path.join(workdir, cfg.TEST_SET_FILENAME)
@@ -67,6 +88,10 @@ def run(workdir, num_xml_files):
 
     data_set = [article for article in data_set if not has_excluded_ref_type(article)]
     print(f"Dataset size (exclude ref types): {len(data_set)}")
+
+    problematic_journal_nlmids = load_problematic_journal_nlmids(PROBLEMATIC_JOURNALS_FILEPATH)
+    data_set = [article for article in data_set if not is_problematic_article(problematic_journal_nlmids, article)]
+    print(f"Dataset size (exclude problematic journals): {len(data_set)}")
 
     test_set_candidates = [article for article in data_set if article["pub_year"] == cfg.TEST_SET_YEAR]
     print(f"Test set candidate size: {len(test_set_candidates)}")

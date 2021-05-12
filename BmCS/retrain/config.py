@@ -10,6 +10,7 @@ EUTILS_DELAY = 0.34 # seconds
 EUTILS_RETMAX = 10000
 JOURNAL_MEDLINE_FILENAME = "J_Medline_16th_April_21.txt.gz"
 NUM_BASLINE_FILES = 1062
+PROBLEMATIC_JOURNALS_FILENAME = "problematic_journals.csv"
 SELECTIVE_INDEXING_PERIODS_FILENAME = "2021_selective_indexing_periods_input.csv"
 TEST_SET_YEAR = 2020
 USE_EUTILS = True
@@ -49,5 +50,5 @@ WORD_INDEX_TXT_VOCAB_SIZE = 400000
 PP_CONFIG = { "min_pub_year": 1809, 
               "max_pub_year": TEST_SET_YEAR-1, 
               "min_year_indexed": 1965, 
-              "max_year_indexed": TEST_SET_YEAR, 
+              "max_year_indexed": TEST_SET_YEAR-1, 
               "date_format": DATE_FORMAT }

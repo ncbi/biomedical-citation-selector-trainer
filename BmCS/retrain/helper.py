@@ -14,6 +14,7 @@ def load_dataset(path, encoding):
         dataset = json.load(file)
         return dataset
 
+
 def load_indexing_periods(filepath, encoding, is_fully_indexed):
     periods = {}
     with open(filepath, "rt", encoding=encoding) as file:
