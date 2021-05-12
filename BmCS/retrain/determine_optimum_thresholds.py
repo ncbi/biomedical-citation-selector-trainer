@@ -63,11 +63,11 @@ def get_voting_predictions(workdir, val_set):
     return predictions
 
 
-def _save_test_set_predictions(workdir, combined_predictions):
+def _save_test_set_predictions(workdir, filename,  combined_predictions):
     import gzip
     
     BMCS_RESULTS_FILEPATH = os.path.join(workdir, cfg.BMCS_RESULTS_FILENAME)
-    SAVE_FILEPATH = os.path.join(workdir, "val_set_predictions.csv")
+    SAVE_FILEPATH = os.path.join(workdir, filename)
     
     with gzip.open(BMCS_RESULTS_FILEPATH, "rt", encoding=cfg.ENCODING) as read_file, \
          open(SAVE_FILEPATH, "wt", encoding=cfg.ENCODING) as write_file:
@@ -88,11 +88,17 @@ def run(workdir):
     voting_predictions = get_voting_predictions(workdir, val_set)
     combined_predictions = get_combined_predictions(cnn_predictions, voting_predictions)
 
-    #_save_test_set_predictions(workdir, combined_predictions)
+    #_save_test_set_predictions(workdir, "val_set_cnn_predictions.csv", cnn_predictions)
+    #_save_test_set_predictions(workdir, "val_set_voting_predictions.csv", voting_predictions)
+    #_save_test_set_predictions(workdir, "val_set_predictions.csv", combined_predictions)
     
     cnn_predictions = to_numpy(cnn_predictions)
     voting_predictions = to_numpy(voting_predictions)
     combined_predictions = to_numpy(combined_predictions)
+
+    #np.save("cnn_predictions.npy", cnn_predictions)
+    #np.save("voting_predictions.npy", voting_predictions)
+    #np.save("combined_predictions.npy", combined_predictions)
 
     filepath = OPT_THRESHOLDS_FILEPATH_TEMPLATE.format("cnn")
     save_optimum_thresholds(cnn_predictions, filepath)
