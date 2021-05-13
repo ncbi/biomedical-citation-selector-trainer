@@ -15,6 +15,7 @@ SELECTIVE_INDEXING_PERIODS_FILENAME = "2021_selective_indexing_periods_input.csv
 TEST_SET_YEAR = 2020
 USE_EUTILS = True
 VOTING_TRAIN_YEARS = [2019]
+MODEL_MAX_YEAR = TEST_SET_YEAR - 1
 
 # System settings
 CNN_DATA_DIR = "cnn_model"
@@ -48,7 +49,7 @@ WORD_INDEX_TXT_FILENAME = "word_indices.txt"
 WORD_INDEX_TXT_VOCAB_SIZE = 400000
 
 PP_CONFIG = { "min_pub_year": 1809, 
-              "max_pub_year": TEST_SET_YEAR-1, 
+              "max_pub_year": MODEL_MAX_YEAR, 
               "min_year_indexed": 1965, 
-              "max_year_indexed": TEST_SET_YEAR-1, 
+              "max_year_indexed": MODEL_MAX_YEAR, 
               "date_format": DATE_FORMAT }
