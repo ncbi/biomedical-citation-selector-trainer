@@ -12,10 +12,13 @@ JOURNAL_MEDLINE_FILENAME = "J_Medline_16th_April_21.txt.gz"
 NUM_BASLINE_FILES = 1062
 PROBLEMATIC_JOURNALS_FILENAME = "problematic_journals.csv"
 SELECTIVE_INDEXING_PERIODS_FILENAME = "2021_selective_indexing_periods_input.csv"
-TEST_SET_YEAR = 2020
+SELECTIVELY_INDEXED_JOURNALS_FILENAME = "selectively_indexed_journals_29th_Mar_21.json"
+TEST_SET_FILENAME = "test_set.json.gz"
+TEST_SET_YEAR = 2019
 USE_EUTILS = True
-VOTING_TRAIN_YEARS = [2019]
-MODEL_MAX_YEAR = TEST_SET_YEAR - 1
+USE_EXISTING_VAL_TEST_SETS = False
+VAL_SET_FILENAME = "validation_set.json.gz"
+
 
 # System settings
 CNN_DATA_DIR = "cnn_model"
@@ -38,15 +41,16 @@ OPT_THRESHOLDS_DELTA = .00005
 OPT_THRESHOLDS_FILENAME_TEMPLATE = "{}_optimum_thresholds.txt"
 OPT_THRESHOLDS_TARGET_PRECISION = 0.97
 OPT_THRESHOLDS_TARGET_RECALL = 0.995
-TEST_SET_FILENAME = "test_set.json.gz"
-TEST_SET_SIZE = 40000
+TEST_SET_SIZE = 30000
 TRAIN_SET_FILENAME = "train_set.json.gz"
-VAL_SET_FILENAME = "val_set.json.gz"
 VOTING_DATA_DIR = "voting_model"
 VOTING_MODEL_FILENAME = "voting_model.joblib"
 WORD_INDEX_DICT_FILENAME = "word_index_dict.pkl"
 WORD_INDEX_TXT_FILENAME = "word_indices.txt"
 WORD_INDEX_TXT_VOCAB_SIZE = 400000
+
+MODEL_MAX_YEAR = TEST_SET_YEAR - 1
+VOTING_TRAIN_YEARS = [MODEL_MAX_YEAR]
 
 PP_CONFIG = { "min_pub_year": 1809, 
               "max_pub_year": MODEL_MAX_YEAR, 
