@@ -31,9 +31,9 @@ class Model:
         pub_year_input, pub_year = self._create_time_period_input(model_config.num_pub_year_time_periods, model_config.inputs_dropout_rate, 'pub_year_input')
         year_completed_input, year_completed = self._create_time_period_input(model_config.num_year_completed_time_periods, model_config.inputs_dropout_rate, 'year_completed_input')
 
-        #journal_input, journal_embedding = self._journal_embedding(model_config.num_journals, model_config.journal_embedding_size, model_config.inputs_dropout_rate)
+        journal_input, journal_embedding = self._journal_embedding(model_config.num_journals, model_config.journal_embedding_size, model_config.inputs_dropout_rate)
         
-        hidden = Concatenate()([title_features, abstract_features, pub_year, year_completed])
+        hidden = Concatenate()([title_features, abstract_features, pub_year, year_completed, journal_embedding])
         for layer_size in model_config.hidden_layer_sizes:
             hidden = Dense(layer_size, activation=None, use_bias=False)(hidden)
             hidden = BatchNormalization()(hidden)
@@ -42,7 +42,7 @@ class Model:
 
         output = Dense(model_config.output_layer_size, activation=model_config.output_layer_act)(hidden)
 
-        model = tensorflow.keras.models.Model(inputs=[title_input, abstract_input, pub_year_input, year_completed_input], outputs=[output])
+        model = tensorflow.keras.models.Model(inputs=[title_input, abstract_input, pub_year_input, year_completed_input, journal_input], outputs=[output])
 
         loss, optimizer, metrics, fscore_threshold = self._get_compile_inputs(model_config.init_learning_rate, model_config.init_threshold) 
         self._fscore_threshold = fscore_threshold

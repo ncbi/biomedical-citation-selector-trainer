@@ -1,7 +1,7 @@
 from . import config as cfg
 import csv
 from datetime import datetime as dt
-from .helper import load_dataset, load_indexing_periods
+from .helper import load_dataset, load_indexing_periods, parse_date
 import json
 import gzip
 import os.path
@@ -92,6 +92,16 @@ def run(workdir, num_xml_files):
     data_set = create_dataset(workdir, num_xml_files)
     print(f"Dataset size: {len(data_set)}")
 
+    data_set = [article for article in data_set if article["pub_year"] <= cfg.TEST_SET_YEAR]
+    print(f"Dataset size (exclude published after test year): {len(data_set)}")
+
+    if cfg.REQUIRE_DATE_COMPLETED:
+        data_set = [article for article in data_set if "date_completed" in article and article["date_completed"] is not None]
+        print(f"Dataset size (exclude no date completed): {len(data_set)}")
+
+        data_set = [article for article in data_set if parse_date(article["date_completed"], cfg.DATE_FORMAT) <= cfg.MAX_DATE_COMPLETED ]
+        print(f"Dataset size (exclude after max date completed): {len(data_set)}")
+
     data_set = [article for article in data_set if not has_excluded_ref_type(article)]
     print(f"Dataset size (exclude ref types): {len(data_set)}")
 
@@ -99,8 +109,8 @@ def run(workdir, num_xml_files):
     data_set = [article for article in data_set if not is_problematic_article(problematic_journal_nlmids, article)]
     print(f"Dataset size (exclude problematic journals): {len(data_set)}")
 
-    all_bmcs_pmids = load_bmcs_pmids(BMCS_RESULTS_FILEPATH)
-    print(f"BmCS pmid count: {len(all_bmcs_pmids)}")
+    # all_bmcs_pmids = load_bmcs_pmids(BMCS_RESULTS_FILEPATH)
+    # print(f"BmCS pmid count: {len(all_bmcs_pmids)}")
 
     if not cfg.USE_EXISTING_VAL_TEST_SETS:
         test_set_candidates = [article for article in data_set if article["pub_year"] == cfg.TEST_SET_YEAR]
@@ -112,8 +122,8 @@ def run(workdir, num_xml_files):
         test_set_candidates = [article for article in test_set_candidates if article["journal_nlmid"] in selectively_indexed_journal_nlmids]
         print(f"Test set candidate size (selectively indexed journals): {len(test_set_candidates)}")
 
-        test_set_candidates = [article for article in test_set_candidates if article["pmid"] not in all_bmcs_pmids]
-        print(f"Test set candidate size (no BmCS pmids): {len(test_set_candidates)}")
+        # test_set_candidates = [article for article in test_set_candidates if article["pmid"] not in all_bmcs_pmids]
+        # print(f"Test set candidate size (no BmCS pmids): {len(test_set_candidates)}")
         
         test_set_candidates = random.sample(test_set_candidates, len(test_set_candidates))
         test_set = test_set_candidates[:cfg.TEST_SET_SIZE]
@@ -140,8 +150,8 @@ def run(workdir, num_xml_files):
     train_set_candidates = [article for article in train_set_candidates if article["pmid"] not in val_test_set_pmids]
     print(f"Train set candidate size (no val test set pmids): {len(train_set_candidates)}")
 
-    train_set_candidates = [article for article in train_set_candidates if article["pmid"] not in all_bmcs_pmids]
-    print(f"Train set candidate size (no BmCS pmids): {len(train_set_candidates)}")
+    # train_set_candidates = [article for article in train_set_candidates if article["pmid"] not in all_bmcs_pmids]
+    # print(f"Train set candidate size (no BmCS pmids): {len(train_set_candidates)}")
 
     train_set = random.sample(train_set_candidates, len(train_set_candidates))
     print(f"Train set size: {len(train_set)}")

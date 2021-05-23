@@ -1,3 +1,4 @@
+from datetime import datetime as dt
 import gzip
 import json
 import os
@@ -42,6 +43,11 @@ def load_indexing_periods(filepath, encoding, is_fully_indexed):
 def load_pickled_object(path):
     loaded_object = pickle.load(open(path, "rb"))
     return loaded_object
+
+
+def parse_date(date_str, date_format):
+    date = dt.strptime(date_str, date_format).date()
+    return date
 
 
 def preprocess_voting_model_data(data, years=[]):
