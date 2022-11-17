@@ -1,32 +1,32 @@
 from datetime import date
 
 # User settings
-BASELINE_FILENAME_TEMPLATE = "pubmed19n{0:04d}.xml.gz"
+BASELINE_FILENAME_TEMPLATE = "pubmed22n{0:04d}.xml.gz"
 BASELINE_URL = "ftp://ftp.ncbi.nlm.nih.gov/pubmed/baseline/" # Must include last /
-BMCS_RESULTS_FILENAME = "bmcs_results_12th_April_21.txt.gz"
+BMCS_RESULTS_FILENAME = "selective-type-dump_15th_Nov_22.txt.gz"
 EFETCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
 ESEARCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
 EUTILS_DELAY = 0.34 # seconds
 EUTILS_RETMAX = 10000
-JOURNAL_MEDLINE_FILENAME = "J_Medline_16th_April_21.txt.gz"
-MAX_DATE_COMPLETED = date(2018, 8, 31)
-NUM_BASLINE_FILES = 972
+JOURNAL_MEDLINE_FILENAME = "J_Medline_7th_Nov_22.txt.gz"
+MAX_BMCS_PROCESSED_DATE = date(2022, 4, 30)
+NUM_BASLINE_FILES = 1114
 PROBLEMATIC_JOURNALS_FILENAME = "problematic_journals.csv"
-REQUIRE_DATE_COMPLETED = True
-SELECTIVE_INDEXING_PERIODS_FILENAME = "2021_selective_indexing_periods_input.csv"
+SELECTIVE_INDEXING_PERIODS_FILENAME = "2022_selective_indexing_periods_input.csv"
 SELECTIVELY_INDEXED_JOURNALS_FILENAME = "selectively_indexed_journals_29th_Mar_21.json"
 TEST_SET_FILENAME = "test_set.json.gz"
 TEST_SET_SIZE = 20000
-TEST_SET_YEAR = 2018
+TEST_SET_YEAR = 2022
 USE_EUTILS = True
 USE_EXISTING_VAL_TEST_SETS = False
 VAL_SET_FILENAME = "validation_set.json.gz"
 
 
 # System settings
+BMCS_RESULTS_DATE_FORMAT = "%Y/%m/%d"
 CNN_DATA_DIR = "cnn_model"
 DATE_FORMAT = "%Y-%m-%d"
-DOWNLOADED_DATA_FILENAME_TEMPLATE = "pubmed19n{0:04d}.xml.gz"
+DOWNLOADED_DATA_FILENAME_TEMPLATE = "pubmed22n{0:04d}.xml.gz"
 ENCODING = "utf8"
 EXTRACTED_DATA_FILENAME_TEMPLATE = "{0:04d}.json.gz"
 EXCLUDED_REF_TYPES = ["CommentOn",

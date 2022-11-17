@@ -8,6 +8,12 @@ import os.path
 import random
 
 
+def add_bmcs_processed_date(data_set, processed_date_lookup):
+    for article in data_set:
+        pmid = article["pmid"]
+        article["bmcs_processed_date"] = processed_date_lookup[pmid] if pmid in processed_date_lookup else None
+
+
 def create_dataset(workdir, num_xml_files):
     DATA_FILEPATH_TEMPLATE = os.path.join(workdir, cfg.MEDLINE_DATA_DIR, cfg.EXTRACTED_DATA_FILENAME_TEMPLATE)
     SELECTIVE_INDEXING_PERIODS_FILEPATH = os.path.join(workdir, cfg.SELECTIVE_INDEXING_PERIODS_FILENAME)
@@ -36,19 +42,15 @@ def has_excluded_ref_type(article):
     return False
 
 
-def load_bmcs_pmids(path, result_list=None):
-    if result_list is None:
-        result_list = [0,1,2]
-    result_list = set(result_list)
-
-    pmids = set()
+def load_bmcs_processing_dates(path):
+    lookup = {}
     with gzip.open(path, "rt", encoding=cfg.ENCODING) as file:
         for line in file:
-            pmid, result = line.strip().split()
-            pmid, result = int(pmid), int(result)
-            if result in result_list:
-                pmids.add(pmid)
-    return pmids
+            line_data = line.strip().split(sep="\t")
+            pmid = int(line_data[0])
+            processed_date_str = parse_date(line_data[3], cfg.BMCS_RESULTS_DATE_FORMAT).isoformat()
+            lookup[pmid] = processed_date_str
+    return lookup
 
 
 def load_problematic_journal_nlmids(path):
@@ -59,7 +61,10 @@ def load_problematic_journal_nlmids(path):
 
 
 def is_problematic_article(problematic_journal_nlmids, article):
-    date_completed_str = article["date_completed"] if article["date_completed"] else article["date_revised"]
+    if not article["date_completed"]:
+        return False
+
+    date_completed_str = article["date_completed"]
     year_completed = dt.strptime(date_completed_str, cfg.DATE_FORMAT).date().year
     
     nlm_id = article["journal_nlmid"]
@@ -92,15 +97,11 @@ def run(workdir, num_xml_files):
     data_set = create_dataset(workdir, num_xml_files)
     print(f"Dataset size: {len(data_set)}")
 
+    processed_date_lookup = load_bmcs_processing_dates(BMCS_RESULTS_FILEPATH)
+    add_bmcs_processed_date(data_set, processed_date_lookup)
+
     data_set = [article for article in data_set if article["pub_year"] <= cfg.TEST_SET_YEAR]
     print(f"Dataset size (exclude published after test year): {len(data_set)}")
-
-    if cfg.REQUIRE_DATE_COMPLETED:
-        data_set = [article for article in data_set if "date_completed" in article and article["date_completed"] is not None]
-        print(f"Dataset size (exclude no date completed): {len(data_set)}")
-
-        data_set = [article for article in data_set if parse_date(article["date_completed"], cfg.DATE_FORMAT) <= cfg.MAX_DATE_COMPLETED ]
-        print(f"Dataset size (exclude after max date completed): {len(data_set)}")
 
     data_set = [article for article in data_set if not has_excluded_ref_type(article)]
     print(f"Dataset size (exclude ref types): {len(data_set)}")
@@ -108,9 +109,6 @@ def run(workdir, num_xml_files):
     problematic_journal_nlmids = load_problematic_journal_nlmids(PROBLEMATIC_JOURNALS_FILEPATH)
     data_set = [article for article in data_set if not is_problematic_article(problematic_journal_nlmids, article)]
     print(f"Dataset size (exclude problematic journals): {len(data_set)}")
-
-    # all_bmcs_pmids = load_bmcs_pmids(BMCS_RESULTS_FILEPATH)
-    # print(f"BmCS pmid count: {len(all_bmcs_pmids)}")
 
     if not cfg.USE_EXISTING_VAL_TEST_SETS:
         test_set_candidates = [article for article in data_set if article["pub_year"] == cfg.TEST_SET_YEAR]
@@ -121,10 +119,13 @@ def run(workdir, num_xml_files):
 
         test_set_candidates = [article for article in test_set_candidates if article["journal_nlmid"] in selectively_indexed_journal_nlmids]
         print(f"Test set candidate size (selectively indexed journals): {len(test_set_candidates)}")
+    
+        test_set_candidates = [article for article in test_set_candidates if article["bmcs_processed_date"]]
+        print(f"Test set candidate size (bmcs processed date): {len(test_set_candidates)}")
 
-        # test_set_candidates = [article for article in test_set_candidates if article["pmid"] not in all_bmcs_pmids]
-        # print(f"Test set candidate size (no BmCS pmids): {len(test_set_candidates)}")
-        
+        test_set_candidates = [article for article in test_set_candidates if parse_date(article["bmcs_processed_date"], cfg.DATE_FORMAT) <= cfg.MAX_BMCS_PROCESSED_DATE ]
+        print(f"Test set candidate size (exclude after max bmcs processed date): {len(test_set_candidates)}")
+
         test_set_candidates = random.sample(test_set_candidates, len(test_set_candidates))
         test_set = test_set_candidates[:cfg.TEST_SET_SIZE]
         val_set = test_set_candidates[cfg.TEST_SET_SIZE:]
@@ -149,9 +150,6 @@ def run(workdir, num_xml_files):
 
     train_set_candidates = [article for article in train_set_candidates if article["pmid"] not in val_test_set_pmids]
     print(f"Train set candidate size (no val test set pmids): {len(train_set_candidates)}")
-
-    # train_set_candidates = [article for article in train_set_candidates if article["pmid"] not in all_bmcs_pmids]
-    # print(f"Train set candidate size (no BmCS pmids): {len(train_set_candidates)}")
 
     train_set = random.sample(train_set_candidates, len(train_set_candidates))
     print(f"Train set size: {len(train_set)}")

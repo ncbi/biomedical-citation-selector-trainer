@@ -36,14 +36,12 @@ def run(workdir, num_xml_files):
 
 
 def _article_is_relevant(article_metadata):
-    pmid, title, abstract, affiliations, journal_nlmid, pub_year, date_completed, date_revised, citation_status, comments_corrections_ref_types = article_metadata
+    pmid, title, abstract, affiliations, journal_nlmid, pub_year, date_completed, citation_status, comments_corrections_ref_types = article_metadata
     medline_or_pubmed = (citation_status == "MEDLINE") or (citation_status == "PubMed-not-MEDLINE")
-    date_completed_or_revised = date_completed or date_revised
     should_extract = pmid and \
                      title and \
                      journal_nlmid and \
                      pub_year and \
-                     date_completed_or_revised and \
                      medline_or_pubmed
     return should_extract
 
@@ -63,15 +61,7 @@ def _extract_article_metadata(medline_citation_node, log_file):
         date_completed_month = date_completed_node.find("Month").text.strip()
         date_completed_day = date_completed_node.find("Day").text.strip()
         date_completed = date(int(date_completed_year), int(date_completed_month), int(date_completed_day))
-
-    date_revised = None
-    date_revised_node = medline_citation_node.find("DateRevised")
-    if date_revised_node is not None:
-        date_revised_year = date_revised_node.find("Year").text.strip()
-        date_revised_month = date_revised_node.find("Month").text.strip()
-        date_revised_day = date_revised_node.find("Day").text.strip()
-        date_revised = date(int(date_revised_year), int(date_revised_month), int(date_revised_day))
-       
+ 
     journal_nlmid_node = medline_citation_node.find("MedlineJournalInfo/NlmUniqueID")
     journal_nlmid = journal_nlmid_node.text.strip() if journal_nlmid_node is not None else ""
 
@@ -117,7 +107,7 @@ def _extract_article_metadata(medline_citation_node, log_file):
     else:
         affiliations = "None"
 
-    return pmid, title, abstract, affiliations, journal_nlmid, pub_year, date_completed, date_revised, citation_status, comments_corrections_ref_types
+    return pmid, title, abstract, affiliations, journal_nlmid, pub_year, date_completed, citation_status, comments_corrections_ref_types
 
 
 def _extract_year_from_medlinedate(pmid, medlinedate_text, log_file):
@@ -145,7 +135,7 @@ def _extract_year_from_medlinedate(pmid, medlinedate_text, log_file):
 
 
 def _get_json_data_for_article(article_metadata):
-    pmid, title, abstract, affiliations, journal_nlmid, pub_year, date_completed, date_revised, citation_status, comments_corrections_ref_types = article_metadata
+    pmid, title, abstract, affiliations, journal_nlmid, pub_year, date_completed, citation_status, comments_corrections_ref_types = article_metadata
     ref_types = list(set(comments_corrections_ref_types))
     article = { "pmid": pmid, 
                 "title": title, 
@@ -153,7 +143,6 @@ def _get_json_data_for_article(article_metadata):
                 "affiliations": affiliations,
                 "pub_year": pub_year,
                 "date_completed": date_completed.isoformat() if date_completed else None,
-                "date_revised": date_revised.isoformat() if date_revised else None,
                 "journal_nlmid": journal_nlmid, 
                 "is_indexed": citation_status == "MEDLINE",
                 "ref_types": ref_types,

@@ -71,18 +71,19 @@ class DataGenerator(Sequence):
             title = article["title"]
             abstract = article["abstract"]
             
-            pub_year = self._pp_config.max_pub_year
-            if "pub_year" in article:
-                pub_year = article["pub_year"]
-                pub_year = self._pp_config.max_pub_year if pub_year > self._pp_config.max_pub_year else pub_year
-                pub_year = self._pp_config.min_pub_year if pub_year < self._pp_config.min_pub_year else pub_year
+            pub_year = article["pub_year"]
+            pub_year = self._pp_config.max_pub_year if pub_year > self._pp_config.max_pub_year else pub_year
+            pub_year = self._pp_config.min_pub_year if pub_year < self._pp_config.min_pub_year else pub_year
             
-            year_completed = self._pp_config.max_year_completed
-            if "date_completed" in article or "date_revised" in article:
-                date_completed_str = article["date_completed"] if article["date_completed"] else article["date_revised"]
-                year_completed = dt.strptime(date_completed_str, self._pp_config.date_format).date().year
-                year_completed = self._pp_config.max_year_completed if year_completed > self._pp_config.max_year_completed else year_completed
-                year_completed = self._pp_config.min_year_completed if year_completed < self._pp_config.min_year_completed else year_completed
+            if article["date_completed"]:
+                year_completed = dt.strptime(article["date_completed"], self._pp_config.date_format).date().year
+            elif article["bmcs_processed_date"]:
+                year_completed = dt.strptime(article["bmcs_processed_date"], self._pp_config.date_format).date().year
+            else:
+                year_completed = article["pub_year"]
+            
+            year_completed = self._pp_config.max_year_completed if year_completed > self._pp_config.max_year_completed else year_completed
+            year_completed = self._pp_config.min_year_completed if year_completed < self._pp_config.min_year_completed else year_completed
             
             nlmid = article["journal_nlmid"]
             journal_id = self._journal_id_lookup[nlmid] if nlmid in self._journal_id_lookup else self._pp_config.unknown_journal_index
