@@ -57,7 +57,7 @@ class _CheckpointConfig(_ConfigBase):
         self.enabled = True
         self.weights_only = True
         self.dir = 'checkpoints'
-        self.filename = 'best_model.hdf5'
+        self.filename = 'best_model.{epoch:03d}-{val_fscore:.4f}.hdf5'
 
 
 class _CsvLoggerConfig(_ConfigBase):
