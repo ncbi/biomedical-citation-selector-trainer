@@ -44,13 +44,8 @@ class DataGenerator(Sequence):
         title_input = self._vectorize_batch_text(title, self._pp_config.title_max_words)
         abstract_input = self._vectorize_batch_text(abstract, self._pp_config.abstract_max_words)
 
-        pub_year = np.array(pub_year, dtype=np.int32).reshape(-1, 1)
-        pub_year_indices = pub_year - self._pp_config.min_pub_year
-        pub_year_input = self._to_time_period_input(pub_year_indices, self._pp_config.num_pub_year_time_periods)
-
-        year_completed = np.array(year_completed, dtype=np.int32).reshape(-1, 1)
-        year_completed_indices = year_completed - self._pp_config.min_year_completed
-        year_completed_input = self._to_time_period_input(year_completed_indices, self._pp_config.num_year_completed_time_periods)
+        pub_year_input =       self._create_year_input(pub_year      , self._pp_config.min_pub_year      , self._pp_config.max_pub_year      , self._pp_config.num_pub_year_time_periods      )
+        year_completed_input = self._create_year_input(year_completed, self._pp_config.min_year_completed, self._pp_config.max_year_completed, self._pp_config.num_year_completed_time_periods)
 
         journal_input = np.array(journal_id, dtype=np.int32).reshape(-1, 1)
 
@@ -64,6 +59,15 @@ class DataGenerator(Sequence):
         
         return batch_x, batch_y
 
+    def _create_year_input(self, year_data, min_year, max_year, num_time_periods):
+        year_data = np.array(year_data, dtype=np.int32).reshape(-1, 1)
+        year_data = np.clip(year_data, a_min=min_year, a_max=max_year)
+        year_indices = max_year - year_data
+        year_indices = np.floor_divide(year_indices, self._pp_config.time_period_size)
+        year_indices = num_time_periods - year_indices - 1
+        year_input = self._to_time_period_input(year_indices, num_time_periods)
+        return year_input
+
     def _get_batch_data(self, start_index, end_index):
         inputs = []
         for article in self._data_set[start_index: end_index]:
@@ -72,8 +76,6 @@ class DataGenerator(Sequence):
             abstract = article["abstract"]
             
             pub_year = article["pub_year"]
-            pub_year = self._pp_config.max_pub_year if pub_year > self._pp_config.max_pub_year else pub_year
-            pub_year = self._pp_config.min_pub_year if pub_year < self._pp_config.min_pub_year else pub_year
             
             if article["date_completed"]:
                 year_completed = dt.strptime(article["date_completed"], self._pp_config.date_format).date().year
@@ -81,9 +83,6 @@ class DataGenerator(Sequence):
                 year_completed = dt.strptime(article["bmcs_processed_date"], self._pp_config.date_format).date().year
             else:
                 year_completed = article["pub_year"]
-            
-            year_completed = self._pp_config.max_year_completed if year_completed > self._pp_config.max_year_completed else year_completed
-            year_completed = self._pp_config.min_year_completed if year_completed < self._pp_config.min_year_completed else year_completed
             
             nlmid = article["journal_nlmid"]
             journal_id = self._journal_id_lookup[nlmid] if nlmid in self._journal_id_lookup else self._pp_config.unknown_journal_index
@@ -98,7 +97,7 @@ class DataGenerator(Sequence):
         batch_indices[np.arange(batch_size)] = np.arange(num_time_periods)
         year_indices_rep = np.repeat(year_indices, num_time_periods, axis=1)
         time_period_input = batch_indices <= year_indices_rep
-        time_period_input = time_period_input.astype(np.float32)
+        time_period_input = time_period_input.astype(np.int32)
         return time_period_input
 
     def _vectorize_batch_text(self, batch_text, max_words):

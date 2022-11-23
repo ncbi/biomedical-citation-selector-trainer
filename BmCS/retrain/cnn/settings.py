@@ -1,5 +1,5 @@
 import json
-import os.path as os_path
+import math
 
 
 ENCODING = 'utf8'
@@ -159,22 +159,25 @@ class _PreprocessingConfig(_ConfigBase):
         self.min_pub_year = None # 1809 
         self.max_pub_year = None # 2018
         self.date_format = '%Y-%m-%d'
+        self.time_period_size = 5
+
+    def _num_time_periods(self, min_year, max_year):
+        if min_year is None:
+            return None
+        if max_year is None:
+            return None
+        num_years = (max_year - min_year) + 1
+        num_periods = num_years / self.time_period_size
+        num_periods = math.ceil(num_periods)
+        return num_periods
 
     @property
     def num_year_completed_time_periods(self):
-        if self.max_year_completed and self.min_year_completed:
-            num_year_completed_time_periods = 1 + self.max_year_completed - self.min_year_completed
-        else:
-            num_year_completed_time_periods = None
-        return num_year_completed_time_periods
-
+        return self._num_time_periods(self.min_year_completed, self.max_year_completed)
+        
     @property
     def num_pub_year_time_periods(self):
-        if self.max_pub_year and self.min_pub_year:
-            num_pub_year_time_periods = 1 + self.max_pub_year - self.min_pub_year
-        else:
-            num_pub_year_time_periods = None
-        return num_pub_year_time_periods
+        return self._num_time_periods(self.min_pub_year, self.max_pub_year)
 
 
 class _ProcessingConfig(_ConfigBase):

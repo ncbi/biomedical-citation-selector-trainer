@@ -11,6 +11,7 @@ EUTILS_RETMAX = 10000
 JOURNAL_MEDLINE_FILENAME = "J_Medline_7th_Nov_22.txt.gz"
 MAX_BMCS_PROCESSED_DATE = date(2022, 4, 30)
 NUM_BASLINE_FILES = 1114
+ONLY_MANUAL_TRAIN_SET_LABELS = True
 PROBLEMATIC_JOURNALS_FILENAME = "problematic_journals.csv"
 SELECTIVE_INDEXING_PERIODS_FILENAME = "2022_selective_indexing_periods_input.csv"
 SELECTIVELY_INDEXED_JOURNALS_FILENAME = "selectively_indexed_journals_7th_Mar_22.json"
@@ -24,6 +25,7 @@ VAL_SET_FILENAME = "validation_set.json.gz"
 
 # System settings
 BMCS_RESULTS_DATE_FORMAT = "%Y/%m/%d"
+BMCS_UNCERTAIN_RESULT = 2
 CNN_DATA_DIR = "cnn_model"
 DATE_FORMAT = "%Y-%m-%d"
 DOWNLOADED_DATA_FILENAME_TEMPLATE = "pubmed22n{0:04d}.xml.gz"
@@ -52,7 +54,7 @@ WORD_INDEX_TXT_FILENAME = "word_indices.txt"
 WORD_INDEX_TXT_VOCAB_SIZE = 400000
 
 MODEL_MAX_YEAR = TEST_SET_YEAR - 1
-VOTING_TRAIN_YEARS = [MODEL_MAX_YEAR]
+VOTING_TRAIN_YEARS = [2021, 2020, 2019, 2018, 2017]
 
 PP_CONFIG = { "min_pub_year": 1809, 
               "max_pub_year": MODEL_MAX_YEAR, 

@@ -8,10 +8,16 @@ import os.path
 import random
 
 
-def add_bmcs_processed_date(data_set, processed_date_lookup):
+def add_bmcs_processing_data(data_set, bmcs_data_lookup):
     for article in data_set:
         pmid = article["pmid"]
-        article["bmcs_processed_date"] = processed_date_lookup[pmid] if pmid in processed_date_lookup else None
+        if pmid in bmcs_data_lookup:
+            article_bmcs_data = bmcs_data_lookup[pmid]
+            article["bmcs_processed_date"] = article_bmcs_data["bmcs_processed_date"]
+            article["bmcs_result"] = article_bmcs_data["bmcs_result"]
+        else:
+            article["bmcs_processed_date"] = None
+            article["bmcs_result"] =  None
 
 
 def create_dataset(workdir, num_xml_files):
@@ -42,14 +48,15 @@ def has_excluded_ref_type(article):
     return False
 
 
-def load_bmcs_processing_dates(path):
+def load_bmcs_processing_data(path):
     lookup = {}
     with gzip.open(path, "rt", encoding=cfg.ENCODING) as file:
         for line in file:
             line_data = line.strip().split(sep="\t")
             pmid = int(line_data[0])
             processed_date_str = parse_date(line_data[3], cfg.BMCS_RESULTS_DATE_FORMAT).isoformat()
-            lookup[pmid] = processed_date_str
+            bmcs_result = int(line_data[4])
+            lookup[pmid] =  { "bmcs_processed_date": processed_date_str, "bmcs_result": bmcs_result }
     return lookup
 
 
@@ -97,8 +104,8 @@ def run(workdir, num_xml_files):
     data_set = create_dataset(workdir, num_xml_files)
     print(f"Dataset size: {len(data_set)}")
 
-    processed_date_lookup = load_bmcs_processing_dates(BMCS_RESULTS_FILEPATH)
-    add_bmcs_processed_date(data_set, processed_date_lookup)
+    bmcs_processing_data = load_bmcs_processing_data(BMCS_RESULTS_FILEPATH)
+    add_bmcs_processing_data(data_set, bmcs_processing_data)
 
     data_set = [article for article in data_set if article["pub_year"] <= cfg.TEST_SET_YEAR]
     print(f"Dataset size (exclude published after test year): {len(data_set)}")
@@ -150,6 +157,10 @@ def run(workdir, num_xml_files):
 
     train_set_candidates = [article for article in train_set_candidates if article["pmid"] not in val_test_set_pmids]
     print(f"Train set candidate size (no val test set pmids): {len(train_set_candidates)}")
+
+    if cfg.ONLY_MANUAL_TRAIN_SET_LABELS:
+        train_set_candidates = [article for article in train_set_candidates if (article["bmcs_result"] is None or article["bmcs_result"] == cfg.BMCS_UNCERTAIN_RESULT)]
+        print(f"Train set candidate size (only manual labels): {len(train_set_candidates)}")
 
     train_set = random.sample(train_set_candidates, len(train_set_candidates))
     print(f"Train set size: {len(train_set)}")
