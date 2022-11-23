@@ -47,8 +47,8 @@ class _MachineConfig:
         self.data_dir = None
         self.runs_dir = None
         self.use_multiprocessing = False
-        self.workers = 1      
-        self.max_queue_size = 1
+        self.workers = 10      
+        self.max_queue_size = 100
         
 
 class _CheckpointConfig(_ConfigBase):
