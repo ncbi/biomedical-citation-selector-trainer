@@ -84,6 +84,7 @@ def run(workdir):
     VAL_SET_FILEPATH = os.path.join(workdir, cfg.VAL_SET_FILENAME)
 
     val_set = load_dataset(VAL_SET_FILEPATH, cfg.ENCODING)
+    #val_set = [c for c in val_set if c["journal_nlmid"] != "101653440" ] # v3 exclude Sci Adv due to false negatives
     cnn_predictions = get_cnn_predictions(workdir, val_set)
     voting_predictions = get_voting_predictions(workdir, val_set)
     combined_predictions = get_combined_predictions(cnn_predictions, voting_predictions)
