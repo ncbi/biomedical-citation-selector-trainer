@@ -3,7 +3,7 @@ import gzip
 import random
 
 selectively_indexed_journals_file = "selectively_indexed_id_mapping_29th_Mar_21.json"
-train_set_file  = "train_set.json.gz"
+train_set_file  = "train_set_all_data.json.gz"
 test_set_file = "test_set_2018_corrected.json.gz"
 
 selectively_indexed_journals = set(json.load(open(selectively_indexed_journals_file)))
@@ -17,6 +17,7 @@ print(f"Test set len :{len(test_set)}")
 test_set = [e for e in test_set if e["journal_nlmid"] in selectively_indexed_journals]
 print(f"Filtered test set len :{len(test_set)}")
 
+print(f"BmCS processed :{len([e for e in test_set if e['bmcs_processed_date'] is not None ])}")
 print(f"Date completed null :{len([e for e in test_set if e['date_completed'] is None ])}")
 print(f"Is indexed :{len([e for e in test_set if e['is_indexed'] ])}")
 
