@@ -103,7 +103,7 @@ class _ModelConfig(_ConfigBase):
         self.output_layer_act = 'sigmoid'
         self.output_layer_size = 1
         
-        self.init_threshold = 0.5
+        self.init_threshold = 0.08
         self.init_learning_rate = 0.001
 
     @property
