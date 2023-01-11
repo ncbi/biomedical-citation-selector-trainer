@@ -34,8 +34,7 @@ def create_dataset(workdir, num_xml_files):
             for article in data["articles"]:
                 if is_selectively_indexed(indexing_periods, article):
                     pmid = article["pmid"]
-                    if pmid not in data_set:
-                        data_set[pmid] = article
+                    data_set[pmid] = article
     print(f"{num_xml_files}/{num_xml_files}")
     data_set_list = list(data_set.values())
     return data_set_list
@@ -92,6 +91,20 @@ def is_selectively_indexed(indexing_periods, article):
     return False
 
 
+def is_bmcs_manual_labeled(article):
+    result = ((article["bmcs_result"] is not None) and
+              (article["bmcs_result"] == cfg.BMCS_UNCERTAIN_RESULT) and
+              (parse_date(article["bmcs_processed_date"], cfg.DATE_FORMAT) <= cfg.MAX_PROCESSED_DATE))
+    return result
+
+
+def is_manual_labeled(article):
+    result = ((article["bmcs_result"] is None) and
+              (article["date_completed"] is not None) and
+              (parse_date(article["date_completed"], cfg.DATE_FORMAT) <= cfg.MAX_PROCESSED_DATE))
+    return result
+
+
 def run(workdir, num_xml_files):
     
     BMCS_RESULTS_FILEPATH = os.path.join(workdir, cfg.BMCS_RESULTS_FILENAME)
@@ -130,12 +143,13 @@ def run(workdir, num_xml_files):
         test_set_candidates = [article for article in test_set_candidates if article["bmcs_processed_date"]]
         print(f"Test set candidate size (bmcs processed date): {len(test_set_candidates)}")
 
-        test_set_candidates = [article for article in test_set_candidates if parse_date(article["bmcs_processed_date"], cfg.DATE_FORMAT) <= cfg.MAX_BMCS_PROCESSED_DATE ]
+        test_set_candidates = [article for article in test_set_candidates if parse_date(article["bmcs_processed_date"], cfg.DATE_FORMAT) <= cfg.MAX_PROCESSED_DATE ]
         print(f"Test set candidate size (exclude after max bmcs processed date): {len(test_set_candidates)}")
 
         test_set_candidates = random.sample(test_set_candidates, len(test_set_candidates))
+        val_test_set_size = cfg.VAL_SET_SIZE + cfg.TEST_SET_SIZE
         test_set = test_set_candidates[:cfg.TEST_SET_SIZE]
-        val_set = test_set_candidates[cfg.TEST_SET_SIZE:]
+        val_set = test_set_candidates[cfg.TEST_SET_SIZE:val_test_set_size]
 
         print("Saving validation set...")
         save_dataset(val_set, VAL_SET_FILEPATH)
@@ -152,15 +166,11 @@ def run(workdir, num_xml_files):
     val_test_set_pmids = set(val_test_set_pmids)
     print(f"Val test set pmid count: {len(val_test_set_pmids)}")
 
-    train_set_candidates = [article for article in data_set if article["pub_year"] < cfg.TEST_SET_YEAR]
+    train_set_candidates = [article for article in data_set if is_manual_labeled(article) or is_bmcs_manual_labeled(article) ]
     print(f"Train set candidate size: {len(train_set_candidates)}")
 
     train_set_candidates = [article for article in train_set_candidates if article["pmid"] not in val_test_set_pmids]
     print(f"Train set candidate size (no val test set pmids): {len(train_set_candidates)}")
-
-    if cfg.ONLY_MANUAL_TRAIN_SET_LABELS:
-        train_set_candidates = [article for article in train_set_candidates if (article["bmcs_result"] is None or article["bmcs_result"] == cfg.BMCS_UNCERTAIN_RESULT)]
-        print(f"Train set candidate size (only manual labels): {len(train_set_candidates)}")
 
     train_set = random.sample(train_set_candidates, len(train_set_candidates))
     print(f"Train set size: {len(train_set)}")
@@ -168,7 +178,7 @@ def run(workdir, num_xml_files):
     print("Saving train set...")
     save_dataset(train_set, TRAIN_SET_FILEPATH)
 
-   
+
 def save_dataset(dataset, filepath):
     with gzip.open(filepath, "wt", encoding=cfg.ENCODING) as save_file:
          json.dump(dataset, save_file, ensure_ascii=False, indent=4)

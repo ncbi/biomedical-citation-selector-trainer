@@ -103,7 +103,7 @@ class _ModelConfig(_ConfigBase):
         self.output_layer_act = 'sigmoid'
         self.output_layer_size = 1
         
-        self.init_threshold = 0.08
+        self.init_threshold = 0.5
         self.init_learning_rate = 0.001
 
     @property
@@ -254,7 +254,7 @@ class _OptimizeFscoreThresholdConfig(_ProcessingConfig):
     def _initialize(self, machine_config):
         super()._initialize(machine_config)
         
-        self.enabled = True
+        self.enabled = False
         self.batch_size = 128
         self.limit = 1000000000
         self.metric_name = 'fscore'

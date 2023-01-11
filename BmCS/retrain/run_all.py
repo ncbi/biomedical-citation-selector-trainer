@@ -8,9 +8,13 @@ from . import extract_medline_data
 from . import retrain_cnn
 from . import retrain_voting
 
+# import os
+# os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+
 
 def run(workdir, use_eutils):
     if use_eutils:
+        raise NotImplementedError("Do not use - as error handling not implemented correctly, may only retrieve 10k records per journal.")
         print("Downloading MEDLINE data from eutils...")
         num_xml_files = download_from_eutils.run(workdir)
     else:
@@ -28,5 +32,5 @@ def run(workdir, use_eutils):
     retrain_voting.run(workdir)
     print("Retraining CNN model...")
     retrain_cnn.run(workdir)
-    print("Finding optimum thresholds...")
-    determine_optimum_thresholds.run(workdir)
+    # print("Finding optimum thresholds...") # Note: Updated system design uses a single threshold
+    # determine_optimum_thresholds.run(workdir)
